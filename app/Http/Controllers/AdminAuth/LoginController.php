@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 use Hesto\MultiAuth\Traits\LogsoutGuard;
+use Illuminate\Http\Request;
 
 class LoginController extends Controller
 {
@@ -60,4 +61,27 @@ class LoginController extends Controller
     {
         return Auth::guard('admin');
     }
+
+
+
+
+    public function login(Request $request)
+    {
+        // Validate the form data
+        $this->validate($request, [
+            'codigo'   => 'required',
+            'password' => 'required|min:6'
+        ]);
+
+        // Attempt to log the user in
+        if (Auth::guard('admin')->attempt(['codigo' => $request->codigo, 'password' => $request->password], $request->remember)) {
+            // if successful, then redirect to their intended location
+            return redirect()->intended(route('/home'));
+        }
+
+        // if unsuccessful, then redirect back to the login with the form data
+        return redirect()->back()->withInput($request->only('codigo', 'remember'));
+    }
+
+
 }
